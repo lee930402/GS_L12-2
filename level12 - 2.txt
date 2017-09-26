@@ -1,0 +1,150 @@
+package level12;
+
+import java.util.Scanner;
+
+public class q2 {
+
+	public static void main(String[] args) {
+		Scanner scan = new Scanner(System.in);
+		int N = scan.nextInt(), M = scan.nextInt(), V = scan.nextInt();
+		int[] dfs = new int[N], bfs = new int[N];
+		Queue2 q = new Queue2(N, M);
+		
+		for(int i = 0; i < M; i++) {
+			int first = scan.nextInt(), next = scan.nextInt();
+			q.push(first, next);
+		}
+		q.copy();
+		DFS(q, dfs, V, 0);
+		System.out.println("---------DFS---------");
+		for(int i = 0; i < N; i++)
+			System.out.print(dfs[i]);
+		System.out.println("");
+		System.out.println("---------BFS---------");
+		BFS(q, bfs, V);
+		for(int i = 0; i < N; i++)
+			System.out.print(bfs[i]);
+
+	}
+	
+	public static void DFS(Queue2 q, int[] dfs, int V, int dfspoint) {
+		int pop, number;
+		if(dfspoint == 0) {
+			dfs[0] = V;
+			DFS(q, dfs, V, dfspoint+1);
+		}
+		else {
+			while(q.top(dfs[dfspoint-1], 1) != 0) {
+				number = q.pop(dfs[dfspoint-1], 0);
+				if(scanArray(dfs, number) == false) {
+					while(dfs[dfspoint] != 0) dfspoint++;
+					dfs[dfspoint] = number;
+					DFS(q, dfs, V, dfspoint+1);
+				}
+				else if(dfspoint < dfs.length) DFS(q, dfs, V, dfspoint);
+				else break;
+			}
+		}
+	}
+	
+	public static void BFS(Queue2 q, int[] bfs, int V) {
+		int bfspoint = 0, number, call = 0;
+		while(bfspoint <= bfs.length-1) {
+			if(bfspoint == 0) {
+				bfs[0] = V;
+				bfspoint++;
+			}
+			else {
+				while(q.top(bfs[call], 2) != 0) {
+					number = q.pop(bfs[call], 1);
+					if(scanArray(bfs, number) == false) {
+						bfs[bfspoint] = number;
+						bfspoint++;
+					}
+				}
+				call++;
+			}
+		}
+	}
+	
+	public static boolean scanArray(int[] dfs, int number) {
+		for(int i = 0; i < dfs.length; i++) {
+			if(dfs[i] == number) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+}
+
+class Queue2 {
+	static int[][] queue;
+	static int[][] dfsqueue;
+	static int[][] bfsqueue;
+	
+	public Queue2(int node, int line) {
+		queue = new int[node+1][line];
+		dfsqueue = new int[node+1][line];
+		bfsqueue = new int[node+1][line];
+	}
+	
+	public static void push(int first, int next) {
+		queue[first][top(first, 0)] = next;
+		queue[next][top(next, 0)] = first;
+	}
+	
+	public static void copy() {
+		for(int i = 0; i < queue.length; i++) {
+			for(int j = 0; j < queue[0].length; j++) {
+				dfsqueue[i][j] = queue[i][j];
+				bfsqueue[i][j] = queue[i][j];
+			}
+		}
+	}
+	
+	public static int pop(int node, int type) {
+		int temp;
+		if(type == 0) {
+			temp = dfsqueue[node][0];
+			for(int i = 0; i < queue[node].length-1; i++) {
+				dfsqueue[node][i] = dfsqueue[node][i+1];
+			}
+			if(dfsqueue[node][queue[node].length-1] != 0)
+				dfsqueue[node][queue[node].length-1] = 0;
+			return temp;
+		}
+		else {
+			temp = bfsqueue[node][0];
+			for(int i = 0; i < queue[node].length-1; i++) {
+				bfsqueue[node][i] = bfsqueue[node][i+1];
+			}
+			if(bfsqueue[node][queue[node].length-1] != 0)
+				bfsqueue[node][queue[node].length-1] = 0;
+			return temp;
+		}
+	}
+	
+	public static int top(int node, int type) {
+		int point = 0;
+		if(type == 0) {
+			while(queue[node][point] != 0) {
+				++point;
+			}
+		} else if(type == 1) {
+			while(dfsqueue[node][point] != 0) {
+				++point;
+			}
+		} else {
+			while(bfsqueue[node][point] != 0) {
+				++point;
+			}
+		}
+		return point;
+	}
+	public static void print(int line) {
+		for(int i = 0; i < queue[line].length; i++)
+			System.out.print(bfsqueue[line][i]);
+	}
+	
+}
